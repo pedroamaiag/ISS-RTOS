@@ -1,5 +1,5 @@
-#ifndef DRV_LED_H
-#define DRV_LED_H
+#ifndef LED_DRIVER_H
+#define LED_DRIVER_H
 
 #ifdef __cplusplus
 extern "C" {

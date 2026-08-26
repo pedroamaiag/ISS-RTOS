@@ -1,6 +1,6 @@
-#include "ctr_drv.h"
-#include "drv_led.h"
-#include "drv_uart.h"
+#include "driver_controller.h"
+#include "led_driver.h"
+#include "uart_driver.h"
 #include <stddef.h>
 
 char (*init_functions[MAX_DRIVERS])(void *);

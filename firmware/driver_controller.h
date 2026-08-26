@@ -1,5 +1,5 @@
-#ifndef CTR_DRV_H
-#define CTR_DRV_H
+#ifndef DRIVER_CONTROLLER_H
+#define DRIVER_CONTROLLER_H
 
 #ifdef __cplusplus
 extern "C" {

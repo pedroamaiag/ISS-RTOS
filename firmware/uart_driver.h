@@ -1,5 +1,5 @@
-#ifndef DRV_UART_H
-#define DRV_UART_H
+#ifndef UART_DRIVER_H
+#define UART_DRIVER_H
 #include "dd_types.h"
 
 char uartInit(void * parameters);

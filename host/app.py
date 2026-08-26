@@ -1,6 +1,6 @@
 import tkinter as tk
 import serial  
-from main import ISSLogic
+from iss_logic import ISSLogic
 
 RFC2217_URL = "rfc2217://localhost:4000"
 BAUDRATE = 9600
