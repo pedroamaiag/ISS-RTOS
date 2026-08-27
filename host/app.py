@@ -1,5 +1,5 @@
 import tkinter as tk
-import serial  
+import serial
 from iss_logic import ISSLogic
 
 RFC2217_URL = "rfc2217://localhost:4000"
@@ -9,7 +9,7 @@ class CyberInterface:
     def __init__(self, root):
         self.logic = ISSLogic()
         self.root = root
-        self.root.title("ISS MISSION CONTROL - UFC")
+        self.root.title("ISS Tracker: Arduino")
         self.root.geometry("500x420")
         self.root.configure(bg="black")
 
