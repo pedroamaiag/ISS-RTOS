@@ -2,6 +2,7 @@
 #include "driver_controller.h"
 #include "dd_types.h"
 #include <avr/interrupt.h>
+#include <stdint.h>
 
 extern volatile unsigned long system_ticks;
 
@@ -33,20 +34,26 @@ char tarefa_monitorar_iss(void) {
     while (callDriver(DRV_UART, UART_READ_CHAR, &sinal) == SUCCESS) {
 
         if (sinal == 'A' || sinal == 'a') {
+            unsigned long current_time = kernelGetTicks();
 
-            if (system_ticks >= proximo_alerta_disponivel) {
+            if ((int32_t)(current_time - proximo_alerta_disponivel) >= 0) {
 
                 enviarMensagem(">>> S.O.: EVENTO DETECTADO");
 
-                piscar_ativo = 1;
+                current_time = kernelGetTicks();
 
-                p_blink.deadline = system_ticks;
-                kernelAddProc(&p_blink);
+                p_blink.deadline = current_time;
 
-                p_stop.deadline = system_ticks + 2000;
-                kernelAddProc(&p_stop);
+                if (kernelAddProc(&p_blink) == SUCCESS) {
+                    p_stop.deadline = current_time + 2000;
 
-                proximo_alerta_disponivel = system_ticks + 5000;
+                    if (kernelAddProc(&p_stop) == SUCCESS) {
+                        piscar_ativo = 1;
+                        proximo_alerta_disponivel = current_time + 5000;
+                    } else {
+                        kernelRemoveProc(&p_blink);
+                    }
+                }
             }
         }
     }

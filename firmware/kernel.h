@@ -17,8 +17,9 @@ typedef struct {
 
 void kernelInit(void);
 char kernelAddProc(process *p);
+char kernelRemoveProc(process *p);
+unsigned long kernelGetTicks(void);
 void kernelLoop(void);
-void kernelTick(void);
 void yield(void);
 
 #ifdef __cplusplus
