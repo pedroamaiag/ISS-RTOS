@@ -12,7 +12,9 @@ extern "C" {
 typedef struct {
     char (*func)(void);
     unsigned long period;
-    unsigned long deadline;
+    unsigned long next_release;
+    unsigned long relative_deadline;
+    unsigned long absolute_deadline;
 } process;
 
 void kernelInit(void);

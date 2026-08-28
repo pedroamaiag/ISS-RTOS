@@ -74,10 +74,10 @@ void kernelLoop(void) {
         unsigned long current_time = kernelGetTicks();
 
         for (int i = 0; i < process_count; i++) {
-            if (timeReached(current_time, process_list[i]->deadline) &&
+            if (timeReached(current_time, process_list[i]->next_release) &&
                 (next_proc == -1 ||
-                 (int32_t)(process_list[i]->deadline -
-                           process_list[next_proc]->deadline) < 0)) {
+                 (int32_t)(process_list[i]->absolute_deadline -
+                           process_list[next_proc]->absolute_deadline) < 0)) {
 
                 next_proc = i;
             }
@@ -87,8 +87,12 @@ void kernelLoop(void) {
             char status = process_list[next_proc]->func();
 
             if (status == SUCCESS) {
-                process_list[next_proc]->deadline =
-                    kernelGetTicks() + process_list[next_proc]->period;
+                current_time = kernelGetTicks();
+                process_list[next_proc]->next_release =
+                    current_time + process_list[next_proc]->period;
+                process_list[next_proc]->absolute_deadline =
+                    process_list[next_proc]->next_release +
+                    process_list[next_proc]->relative_deadline;
             } else {
                 for (int j = next_proc; j < process_count - 1; j++) {
                     process_list[j] = process_list[j + 1];

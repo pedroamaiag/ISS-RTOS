@@ -7,15 +7,16 @@
 extern volatile unsigned long system_ticks;
 
 volatile char piscar_ativo = 0;
-unsigned long proximo_alerta_disponivel = 0;
+unsigned long ultimo_alerta = 0;
+char alerta_ja_ocorreu = 0;
 
 char tarefa_monitorar_iss(void);
 char tarefa_piscar_led(void);
 char tarefa_apagar_led(void);
 
-process p_uart   = { tarefa_monitorar_iss, 1,   0 };   
-process p_blink  = { tarefa_piscar_led,   200, 0 };   
-process p_stop   = { tarefa_apagar_led,   0,   0 };   
+process p_uart   = { tarefa_monitorar_iss, 1,   0, 1,   1 };
+process p_blink  = { tarefa_piscar_led,   200, 0, 200, 200 };
+process p_stop   = { tarefa_apagar_led,   0,   0, 1,   1 };
 
 void enviarMensagem(const char* msg) {
     for (int i = 0; msg[i] != '\0'; i++) {
@@ -36,20 +37,26 @@ char tarefa_monitorar_iss(void) {
         if (sinal == 'A' || sinal == 'a') {
             unsigned long current_time = kernelGetTicks();
 
-            if ((int32_t)(current_time - proximo_alerta_disponivel) >= 0) {
+            if (!alerta_ja_ocorreu ||
+                (unsigned long)(current_time - ultimo_alerta) >= 5000) {
 
                 enviarMensagem(">>> S.O.: EVENTO DETECTADO");
 
                 current_time = kernelGetTicks();
 
-                p_blink.deadline = current_time;
+                p_blink.next_release = current_time;
+                p_blink.absolute_deadline =
+                    p_blink.next_release + p_blink.relative_deadline;
 
                 if (kernelAddProc(&p_blink) == SUCCESS) {
-                    p_stop.deadline = current_time + 2000;
+                    p_stop.next_release = current_time + 2000;
+                    p_stop.absolute_deadline =
+                        p_stop.next_release + p_stop.relative_deadline;
 
                     if (kernelAddProc(&p_stop) == SUCCESS) {
                         piscar_ativo = 1;
-                        proximo_alerta_disponivel = current_time + 5000;
+                        ultimo_alerta = current_time;
+                        alerta_ja_ocorreu = 1;
                     } else {
                         kernelRemoveProc(&p_blink);
                     }
