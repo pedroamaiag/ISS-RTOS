@@ -1,51 +1,86 @@
-# Kernel EDF - Monitoramento ISS
+# ISS-RTOS
 
-Este projeto implementa um **Sistema Operacional de Tempo Real (RTOS)** simplificado para Arduino Mega, utilizando o algoritmo de escalonamento **EDF (Earliest Deadline First)**. O sistema é integrado a uma interface Python que monitora a posição da Estação Espacial Internacional (ISS) e envia sinais via Serial para acionamento de alertas visuais no hardware.
+Projeto acadêmico que acompanha a posição da Estação Espacial Internacional
+e envia um aviso para um Arduino quando a ISS muda de cidade.
 
-## Estrutura do Software
+A aplicação foi feita em Python e o firmware foi desenvolvido
+para Arduino Mega 2560.
 
-O sistema foi desenvolvido seguindo uma arquitetura modular para garantir independência entre hardware e lógica de aplicação:
+## Como funciona
 
-* **Camada de Escalonamento (Kernel):** Gerencia a fila de processos e decide qual tarefa deve ser executada com base no menor prazo de finalização (*deadline*).
-* **Camada de Abstração (Drivers):** Central de controle que padroniza a comunicação com os periféricos (LED e UART).
-* **Aplicação:** Tarefas periódicas que monitoram a porta serial e gerenciam o comportamento dos alertas.
-* **Interface Externa:** Script Python que consome APIs geográficas e atua como o sensor de posição da ISS.
+O programa em Python consulta a posição atual da ISS
+e tenta identificar a cidade mais próxima.
 
-## Organização dos Arquivos
+Quando a cidade muda, o programa envia o caractere `A`
+pela comunicação serial.
 
-### Núcleo do S.O.
-* `kernel.cpp` / `kernel.h`: Lógica do escalonador e gerenciamento de processos.
-* `ctr_drv.cpp` / `ctr_drv.h`: Gerenciador central de drivers.
-* `dd_types.h`: Definições de constantes, IDs de drivers e comandos.
+O Arduino recebe esse sinal e usa o kernel do projeto
+para controlar um LED de aviso.
 
-### Drivers de Hardware
-* `drv_uart.cpp` / `drv_uart.h`: Comunicação serial com tratamento de erros e limpeza de buffer.
-* `drv_led.cpp` / `drv_led.h`: Controle de GPIO via registradores do ATmega2560.
+## Projeto
 
-### Lógica de Controle
-* `sketch.ino`: Configuração de hardware (Timers), inicialização do Kernel e definição das tarefas de monitoramento.
-* `interface.py` / `main.py`: Interface gráfica em Tkinter e lógica de requisição de dados da ISS.
+O repositório está dividido em duas partes principais:
 
----
+* `host/`: aplicação em Python;
+* `firmware/`: código do Arduino Mega 2560.
 
-## Simulação no Wokwi
+A documentação mais detalhada do projeto fica em:
 
-Para reproduzir o hardware deste projeto no simulador **Wokwi**, crie um arquivo chamado `diagram.json` e utilize a configuração abaixo:
+```text
+docs/
+```
 
-```json
-{
-  "version": 1,
-  "author": "User",
-  "editor": "wokwi",
-  "parts": [
-    { "type": "wokwi-arduino-mega", "id": "mega", "top": 0, "left": 0 },
-    { "type": "wokwi-led", "id": "led1", "top": -100, "left": 150, "attrs": { "color": "red" } }
-  ],
-  "connections": [
-    [ "mega:22", "led1:A", "red", [ "v0" ] ],
-    [ "mega:GND.2", "led1:C", "black", [ "v0" ] ]
-  ],
-  "serialPorts": [
-    { "type": "wokwi-serial-port", "id": "serial0", "port": 0 }
-  ]
-}
+## Executar a aplicação
+
+Crie um ambiente virtual:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Instale as dependências:
+
+```bash
+pip install -r requirements.txt
+```
+
+Execute:
+
+```bash
+python host/app.py
+```
+
+## Compilar o firmware
+
+Instale o suporte ao Arduino AVR:
+
+```bash
+arduino-cli core update-index
+arduino-cli core install arduino:avr
+```
+
+Compile para Arduino Mega 2560:
+
+```bash
+arduino-cli compile --fqbn arduino:avr:mega firmware/
+```
+
+## Documentação
+
+Mais detalhes sobre o funcionamento do projeto podem ser encontrados em:
+
+* [`docs/architecture.md`](docs/architecture.md)
+* [`docs/kernel.md`](docs/kernel.md)
+* [`docs/firmware.md`](docs/firmware.md)
+* [`docs/host.md`](docs/host.md)
+* [`docs/communication.md`](docs/communication.md)
+* [`docs/setup.md`](docs/setup.md)
+
+## Sobre
+
+Este projeto foi desenvolvido originalmente como trabalho acadêmico
+para estudar sistemas de tempo real e comunicação com microcontroladores.
+
+O Arduino utilizado originalmente era virtual, através do Wokwi.
+O projeto está sendo atualizado para também permitir o uso de um Arduino físico.
